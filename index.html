@@ -152,7 +152,9 @@ label.btn{display:inline-flex;margin:0;font-size:15px;color:var(--text)}
  .topm .sb{font-family:'Cormorant Garamond';font-style:italic;color:var(--gold);font-size:15px}
  main{padding:20px 16px 110px}
  .kpis,.kpis.k3{grid-template-columns:1fr 1fr}
- .grid2{grid-template-columns:1fr}
+ .grid2{grid-template-columns:minmax(0,1fr)}
+ .lanc .est-i{min-width:0}
+ .lanc>b{font-size:20px}
  .kpi b{font-size:27px}
  .bottom{display:flex;position:fixed;bottom:0;left:0;right:0;background:rgba(17,17,19,.97);border-top:1px solid var(--line);overflow-x:auto;padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:30;scrollbar-width:none}
  .bottom::-webkit-scrollbar{display:none}
