@@ -1,0 +1,743 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GR Studio">
+<title>GR Studio Beauty</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Barlow+Condensed:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0b;--bg2:#111113;--card:#151517;--card2:#1c1c1f;--line:#2b2720;--gold:#c9a24a;--gold2:#ecd08a;--goldg:linear-gradient(135deg,#8a6a24,#e3c27a 45%,#b8903f);--text:#f3eee5;--muted:#9b9488;--red:#e5675d;--amber:#e5a94b;--green:#62c48b;--wa:#25d366}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text)}
+body{font-family:'Barlow Condensed',system-ui,sans-serif;font-size:17px;line-height:1.35;min-height:100vh;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit}
+.app{display:flex;min-height:100vh}
+.side{width:240px;flex-shrink:0;border-right:1px solid var(--line);padding:28px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:26px;background:radial-gradient(ellipse at top,#1d180d 0,transparent 65%);overflow-y:auto}
+.logo{text-align:center}
+.mono{font-family:'Cormorant Garamond',serif;font-size:60px;line-height:.9;font-weight:600;background:var(--goldg);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-3px}
+.logo .nm{font-family:'Cormorant Garamond',serif;letter-spacing:3px;font-size:13px;color:var(--gold2);margin-top:8px;font-weight:600}
+.logo .sb{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--gold)}
+.navl{display:flex;flex-direction:column;gap:3px}
+.nb{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;background:none;border:0;cursor:pointer;color:var(--muted);font-size:17px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;position:relative;text-align:left}
+.nb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.nb:hover{color:var(--text);background:var(--card)}
+.nb.on{color:var(--gold2);background:linear-gradient(90deg,rgba(201,162,74,.18),transparent)}
+.badge{margin-left:auto;background:var(--red);color:#fff;font-size:12px;font-weight:700;font-style:normal;min-width:20px;height:20px;border-radius:10px;display:grid;place-items:center;padding:0 6px}
+.badge[hidden]{display:none}
+main{flex:1;min-width:0;padding:32px clamp(16px,4vw,48px) 100px;max-width:1240px}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+.head .btns{display:flex;gap:8px;flex-wrap:wrap}
+.eyebrow{text-transform:uppercase;letter-spacing:3px;font-size:13px;color:var(--gold)}
+h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(30px,4vw,42px);line-height:1.05;text-transform:none}
+h1::first-letter{text-transform:uppercase}
+h2{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:23px;margin-bottom:10px;color:var(--gold2);display:flex;align-items:center;gap:10px}
+.cnt{font-family:'Barlow Condensed';font-size:13px;background:var(--red);color:#fff;border-radius:10px;padding:0 8px;font-weight:700}
+.cnt.z{background:var(--card2);color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpis.k3{grid-template-columns:repeat(3,1fr)}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--goldg)}
+.kpi span{font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)}
+.kpi b{display:block;font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:34px;letter-spacing:1px;margin-top:4px;white-space:nowrap}
+.kpi small{color:var(--muted);font-size:14px}
+.kpi.neg b{color:var(--red)}.kpi.pos b{color:var(--green)}
+.grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;align-items:start}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:10px;border:1px solid var(--line);background:var(--card2);cursor:pointer;font-weight:600;letter-spacing:.8px;text-transform:uppercase;font-size:15px;white-space:nowrap;text-decoration:none;color:var(--text)}
+.btn.gold{background:var(--goldg);color:#1a1408;border:0}
+.btn.ghost{background:transparent}
+.btn.danger{background:transparent;color:var(--red);border-color:rgba(229,103,93,.4)}
+.btn.wa{background:var(--wa);color:#05290f;border:0}
+.btn.sm{padding:7px 12px;font-size:13px}
+.btn:active,.ib:active{transform:scale(.96)}
+.ag,.cli,.est,.lanc,.al{display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--line)}
+.al{justify-content:space-between;gap:10px;padding:10px 0}
+.ag-t{width:56px;text-align:center;flex-shrink:0}
+.ag-t b{font-family:'Bebas Neue';font-weight:400;font-size:24px;color:var(--gold2);display:block;line-height:1}
+.ag-t small{color:var(--muted);font-size:13px}
+.ag-i,.cli-i,.est-i{flex:1;min-width:0}
+.ag-n{font-weight:600;font-size:18px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ag-s{color:var(--muted);font-size:15px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+.chip{font-size:12px;text-transform:uppercase;letter-spacing:.8px;padding:2px 8px;border-radius:20px;border:1px solid var(--line);color:var(--muted);font-weight:600;white-space:nowrap}
+.chip.ok,.s-concluido{color:var(--green);border-color:rgba(98,196,139,.4)}
+.chip.warn{color:var(--amber);border-color:rgba(229,169,75,.45)}
+.chip.bad,.s-cancelado,.s-faltou{color:var(--red);border-color:rgba(229,103,93,.4)}
+.chip.gold,.s-confirmado{color:var(--gold2);border-color:rgba(201,162,74,.5)}
+.st-cancelado,.st-faltou{opacity:.5}
+.ag-a{display:flex;gap:6px;flex-shrink:0}
+.ib{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--card2);display:grid;place-items:center;cursor:pointer;font-size:17px;text-decoration:none;color:var(--text);flex-shrink:0}
+.ib.ok{background:rgba(98,196,139,.15);color:var(--green);border-color:rgba(98,196,139,.4)}
+.ib.wa{color:var(--wa)}
+.av{width:42px;height:42px;border-radius:50%;background:var(--goldg);color:#1a1408;display:grid;place-items:center;font-family:'Cormorant Garamond';font-weight:700;font-size:22px;flex-shrink:0}
+.empty{color:var(--muted);padding:14px 0;font-style:italic;border-top:1px solid var(--line)}
+.muted{color:var(--muted)}.sm{font-size:14px}
+.gold-t{color:var(--gold2)}
+.banner{border:1px solid rgba(201,162,74,.35);background:rgba(201,162,74,.07);border-radius:14px;padding:14px 16px;margin-bottom:18px;font-size:16px}
+.search{margin-bottom:14px}
+/* agenda */
+.week{display:flex;gap:6px;margin-bottom:12px}
+.week .nav{width:34px;flex-shrink:0;background:var(--card);border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:22px;color:var(--gold)}
+.day{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;min-width:0;gap:1px}
+.day span{font-size:12px;text-transform:uppercase;color:var(--muted);letter-spacing:1px}
+.day b{font-family:'Bebas Neue';font-weight:400;font-size:24px;line-height:1.1}
+.day i{font-style:normal;font-size:11px;background:var(--gold);color:#111;border-radius:8px;padding:0 6px;font-weight:700;min-height:15px}
+.day i:empty{background:none}
+.day.td b{color:var(--gold2)}
+.day.on{background:var(--goldg);border-color:transparent}.day.on span{color:#3a2c10}.day.on b{color:#1a1408}.day.on i{background:#1a1408;color:var(--gold2)}
+.tools{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+.tools input{width:auto}
+/* serviços */
+.srvs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.srv{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;cursor:pointer;transition:.2s}
+.srv:hover{border-color:var(--gold)}
+.srv-n{font-weight:600;font-size:19px}
+.srv-p{font-family:'Bebas Neue';font-size:32px;color:var(--gold2);line-height:1.2}
+/* estoque / financeiro */
+.est{flex-wrap:wrap}
+.est-i{min-width:170px}
+.qty{display:flex;align-items:center;gap:6px}
+.qty b{font-family:'Bebas Neue';font-weight:400;font-size:28px;min-width:44px;text-align:center}
+.est.lv2 .qty b{color:var(--red)}.est.lv1 .qty b{color:var(--amber)}
+.lanc-d{font-family:'Bebas Neue';font-size:20px;color:var(--muted);width:46px;flex-shrink:0}
+.lanc>b{font-family:'Bebas Neue';font-weight:400;font-size:22px;white-space:nowrap}
+.pos{color:var(--green)}.neg{color:var(--red)}
+.bar{margin-bottom:12px}.bar-h{display:flex;justify-content:space-between;font-size:15px;margin-bottom:4px}.bar-t{height:8px;background:var(--bg2);border-radius:4px;overflow:hidden}.bar-f{height:100%;background:var(--goldg);border-radius:4px}
+/* mensagens */
+.msg{border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px;background:var(--bg2)}
+.msg.sent{opacity:.55}
+.msg-h{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.msg-t{white-space:pre-wrap;font-family:system-ui,-apple-system,sans-serif;font-size:14px;line-height:1.45;color:#d6cfc2;background:var(--card);border-radius:10px;padding:10px 12px;margin:10px 0;border-left:3px solid var(--wa)}
+.msg-a{display:flex;gap:8px;flex-wrap:wrap}
+.toggle{display:flex;gap:6px;margin-bottom:16px}
+/* forms */
+label{display:grid;gap:5px;font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px}
+input,select,textarea{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:17px;text-transform:none;letter-spacing:0;color:var(--text);width:100%;outline:none;font-family:'Barlow Condensed',system-ui,sans-serif}
+textarea{font-family:system-ui,-apple-system,sans-serif;font-size:15px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+input[type=date],input[type=time],input[type=month]{color-scheme:dark}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label.check{display:flex;align-items:center;gap:10px;text-transform:none;font-size:16px;color:var(--text);letter-spacing:0;cursor:pointer}
+label.check input{width:20px;height:20px;accent-color:var(--gold)}
+label.btn{display:inline-flex;margin:0;font-size:15px;color:var(--text)}
+.sub{border:1px dashed var(--gold);border-radius:12px;padding:12px 12px 0;margin-bottom:12px}
+.mfoot{display:flex;justify-content:flex-end;gap:10px;margin-top:10px;flex-wrap:wrap}
+.mfoot .danger{margin-right:auto}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+/* modal / toast */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal.hidden{display:none}
+.mbox{background:var(--card);border:1px solid var(--line);border-radius:18px;width:100%;max-width:540px;max-height:92vh;overflow:auto;padding:20px}
+.mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
+.mhead h3{font-family:'Cormorant Garamond';font-size:26px;color:var(--gold2);font-weight:600}
+.mhead button{background:none;border:0;font-size:22px;color:var(--muted);cursor:pointer}
+#toast{position:fixed;left:50%;bottom:96px;transform:translate(-50%,20px);background:var(--card2);border:1px solid var(--gold);color:var(--text);padding:12px 18px;border-radius:12px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+.topm,.bottom{display:none}
+@media(max-width:900px){
+ .side{display:none}
+ .app{flex-direction:column}
+ .topm{display:flex;align-items:center;justify-content:center;gap:12px;padding:12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(10,10,11,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:20}
+ .topm .mono{font-size:34px}
+ .topm .nm{font-family:'Cormorant Garamond';letter-spacing:2px;font-size:13px;color:var(--gold2);font-weight:600;line-height:1.1}
+ .topm .sb{font-family:'Cormorant Garamond';font-style:italic;color:var(--gold);font-size:15px}
+ main{padding:20px 16px 110px}
+ .kpis,.kpis.k3{grid-template-columns:1fr 1fr}
+ .grid2{grid-template-columns:1fr}
+ .kpi b{font-size:27px}
+ .bottom{display:flex;position:fixed;bottom:0;left:0;right:0;background:rgba(17,17,19,.97);border-top:1px solid var(--line);overflow-x:auto;padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:30;scrollbar-width:none}
+ .bottom::-webkit-scrollbar{display:none}
+ .bottom .nb{flex-direction:column;gap:2px;font-size:11px;padding:6px 8px;min-width:66px;align-items:center;letter-spacing:.3px}
+ .bottom .badge{position:absolute;top:0;right:8px;margin:0;font-size:10px;min-width:16px;height:16px}
+ .ag,.cli{gap:10px}
+}
+@media(max-width:380px){.row{grid-template-columns:1fr}.day span{font-size:10px}}
+/* login / sync */
+.gate{position:fixed;inset:0;z-index:100;background:radial-gradient(ellipse at top,#241c0c,var(--bg) 60%);display:grid;place-items:center;padding:20px;overflow:auto}
+.gate.hidden{display:none}
+.gbox{width:100%;max-width:380px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px 24px}
+.gbox .logo{margin-bottom:22px}.gbox .mono{font-size:76px}
+.gbox .btn{width:100%}
+.ginfo{color:var(--green);font-size:15px;margin-bottom:10px}
+.gerr{color:var(--red);font-size:15px;min-height:20px;margin-bottom:10px}
+.glink{display:block;text-align:center;margin-top:14px;color:var(--muted);font-size:14px;cursor:pointer;background:none;border:0;width:100%}
+#sync{position:fixed;top:10px;right:12px;z-index:40;font-size:13px;letter-spacing:.5px;padding:3px 10px;border-radius:20px;background:var(--card2);border:1px solid var(--line);color:var(--muted)}
+#sync.ok{color:var(--green)}#sync.error{color:var(--red);border-color:rgba(229,103,93,.5)}
+body.locked .app,body.locked .bottom,body.locked #sync{display:none}
+.side .sair{margin-top:auto}
+@media(max-width:900px){#sync{font-size:11px;padding:2px 8px;top:6px;right:8px}}
+</style>
+</head>
+<body class="locked">
+<div class="app">
+ <aside class="side">
+  <div class="logo"><div class="mono">GR</div><div class="nm">GABRIELA RIBEIRO</div><div class="sb">Studio Beauty</div></div>
+  <nav class="navl" id="navSide"></nav>
+  <button class="btn ghost sm sair" onclick="sair()">Sair</button>
+ </aside>
+ <header class="topm"><div class="mono">GR</div><div><div class="nm">GABRIELA RIBEIRO</div><div class="sb">Studio Beauty</div></div></header>
+ <main id="view"></main>
+</div>
+<nav class="bottom" id="navBottom"></nav>
+<div id="modal" class="modal hidden" onclick="if(event.target===this)closeModal()"><div class="mbox"><div class="mhead"><h3 id="mtitle"></h3><button type="button" onclick="closeModal()" aria-label="Fechar">✕</button></div><div id="mbody"></div></div></div>
+<div id="toast"></div>
+<div id="sync" class="ok">☁ Salvo</div>
+<div id="gate" class="gate hidden"></div>
+
+<script>
+/* ============ UTIL ============ */
+const KEY='gr_studio_v1';
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const today=()=>ymd(new Date());
+const parse=s=>{const[y,m,d]=String(s).split('-').map(Number);return new Date(y,(m||1)-1,d||1)};
+const addDays=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return ymd(d)};
+const diffDays=(a,b)=>Math.round((parse(b)-parse(a))/864e5);
+const brDate=s=>s?String(s).split('-').reverse().join('/'):'';
+const money=v=>(+v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const WEEK=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const weekday=s=>WEEK[parse(s).getDay()];
+const tmin=h=>{const[a,b]=(h||'0:0').split(':').map(Number);return(a||0)*60+(b||0)};
+const fone=t=>{const d=String(t||'').replace(/\D/g,'');if(d.length===11)return`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;if(d.length===10)return`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;return t||''};
+const idade=n=>{if(!n)return'';const t=new Date(),d=parse(n);let i=t.getFullYear()-d.getFullYear();if(t.getMonth()<d.getMonth()||(t.getMonth()===d.getMonth()&&t.getDate()<d.getDate()))i--;return i};
+const byTime=(a,b)=>(a.hora||'').localeCompare(b.hora||'');
+const byDT=(a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora);
+const empty=m=>`<div class="empty">${m}</div>`;
+const nomeMes=s=>parse(s).toLocaleDateString('pt-BR',{month:'long'});
+
+const STATUS={agendado:'Agendado',confirmado:'Confirmado',concluido:'Concluído',cancelado:'Cancelado',faltou:'Faltou'};
+const ATIVO=s=>s==='agendado'||s==='confirmado';
+const PAGS=['PIX','Dinheiro','Cartão de débito','Cartão de crédito','Outro'];
+const CATS=['Produtos / Material','Aluguel','Energia / Água','Internet / Telefone','Marketing / Anúncios','Cursos','Taxas / Maquininha','Pró-labore','Outros'];
+const LBL={lembrete:'Lembrete de horário',sinal:'Cobrança do sinal',manutencao:'Lembrete de manutenção',aniversario:'Aniversário'};
+const TPL={
+ lembrete:'Olá, {nome}! 💛\nPassando para lembrar do seu horário no {studio}:\n\n✨ {servico}\n📅 {dia_semana}, {data}\n⏰ {hora}\n📍 {endereco}\n\nQualquer imprevisto, me avise com antecedência, combinado? Te espero! 🥰',
+ sinal:'Olá, {nome}! 💛\nPara confirmar seu horário de *{servico}* no dia {data} às {hora}, é necessário o pagamento do sinal de *{sinal}*.\n\n🔑 Chave PIX: {pix}\n\nAssim que pagar, me envie o comprovante por aqui. O valor é abatido no dia do atendimento. ✨',
+ manutencao:'Oi, {nome}! ✨\nJá está chegando a hora da manutenção do seu *{servico}* (ideal até {data}).\n\nVamos garantir seu horário? Me chama aqui que te passo os horários disponíveis! 💛\n{studio}',
+ aniversario:'Feliz aniversário, {nome}! 🎉💛\nQue seu novo ciclo seja lindo, leve e cheio de conquistas.\nUm beijo enorme de toda equipe do {studio}! ✨'
+};
+const SRV_PADRAO=[
+ {nome:'Design de sobrancelhas',preco:45,duracao:40,sinal:0,manutDias:20},
+ {nome:'Design com henna',preco:60,duracao:50,sinal:0,manutDias:20},
+ {nome:'Brow lamination',preco:130,duracao:70,sinal:30,manutDias:45},
+ {nome:'Lash lifting',preco:130,duracao:70,sinal:30,manutDias:45},
+ {nome:'Extensão de cílios · Fio a fio',preco:150,duracao:120,sinal:40,manutDias:20},
+ {nome:'Extensão de cílios · Volume brasileiro',preco:170,duracao:120,sinal:40,manutDias:20},
+ {nome:'Manutenção de cílios',preco:100,duracao:90,sinal:30,manutDias:20},
+ {nome:'Remoção de extensão',preco:40,duracao:30,sinal:0,manutDias:0}
+];
+
+/* ============ DADOS ============ */
+function defaultDB(){return{
+ config:{studio:'Gabriela Ribeiro Studio Beauty',profissional:'Gabriela',pix:'',endereco:'Guarulhos / SP',antecedenciaManut:5,tpl:{...TPL}},
+ servicos:SRV_PADRAO.map(s=>({id:uid(),...s})),
+ clientes:[],agendamentos:[],estoque:[],lancamentos:[],enviados:{},ultimoBackup:''
+}}
+let db=defaultDB();
+const COLS=['servicos','clientes','agendamentos','estoque','lancamentos'];
+const canon=o=>JSON.stringify(o,(k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.keys(v).sort().reduce((a,x)=>(a[x]=v[x],a),{}):v);
+function normalize(d){
+ const base=defaultDB(),o={...base,...d},c=(d&&d.config)||{};
+ o.config={...base.config,...c,tpl:{...TPL,...(c.tpl||{})}};
+ for(const k of COLS)if(!Array.isArray(o[k]))o[k]=[];
+ o.enviados=o.enviados||{};o.ultimoBackup=o.ultimoBackup||'';
+ return o;
+}
+function flatten(){
+ const m={};
+ for(const c of COLS)for(const it of db[c])m[c+':'+it.id]=canon(it);
+ m['config:main']=canon({config:db.config,ultimoBackup:db.ultimoBackup});
+ m['enviados:main']=canon(db.enviados);
+ return m;
+}
+function fromRows(rows){
+ const d={servicos:[],clientes:[],agendamentos:[],estoque:[],lancamentos:[]};let cf,en;
+ for(const r of rows){if(r.colecao==='config')cf=r.dados;else if(r.colecao==='enviados')en=r.dados;else if(COLS.includes(r.colecao))d[r.colecao].push(r.dados)}
+ d.config=cf&&cf.config;d.ultimoBackup=(cf&&cf.ultimoBackup)||'';d.enviados=en||{};
+ d.servicos.sort((a,b)=>String(a.nome).localeCompare(String(b.nome)));
+ return normalize(d);
+}
+/* --- conexão com o Supabase --- */
+const SB_URL='https://gjkkgkqoprcrctbgtwjv.supabase.co',SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqa2tna3FvcHJjcmN0Ymd0d2p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxMDE5NzcsImV4cCI6MjEwODY3Nzk3N30.3SFOkQ33rarFuvRtjvorb0GTaQjVBgOHdGyA92yT0R4';
+let recovering=false,sb=null,session=null,snap={},dirty=false,syncing=false,again=false,saveT=null,retryT=null,pollT=null;
+const sbCfg=()=>{let c={};try{c=JSON.parse(localStorage.getItem('gr_sb_cfg')||'{}')}catch(e){}return{url:SB_URL||c.url||'',key:SB_KEY||c.key||''}};
+function setSync(s){const el=document.getElementById('sync');if(!el)return;el.className=s==='error'?'error':s==='ok'?'ok':'';el.textContent={ok:'☁ Salvo',saving:'Salvando…',loading:'Sincronizando…',error:'⚠ Sem conexão — tentando de novo'}[s]||''}
+function pending(){const cur=flatten();for(const k in cur)if(snap[k]!==cur[k])return true;for(const k in snap)if(!(k in cur))return true;return false}
+function save(){dirty=true;setSync('saving');clearTimeout(saveT);saveT=setTimeout(flush,500)}
+async function flush(){
+ if(!sb||!session)return;
+ if(syncing){again=true;return}
+ syncing=true;
+ try{
+  do{
+   again=false;
+   const cur=flatten(),up=[],del=[];
+   for(const k in cur)if(snap[k]!==cur[k])up.push({chave:k,colecao:k.split(':')[0],dados:JSON.parse(cur[k])});
+   for(const k in snap)if(!(k in cur))del.push(k);
+   for(let i=0;i<up.length;i+=200){const{error}=await sb.from('registros').upsert(up.slice(i,i+200),{onConflict:'chave'});if(error)throw error}
+   for(let i=0;i<del.length;i+=100){const{error}=await sb.from('registros').delete().in('chave',del.slice(i,i+100));if(error)throw error}
+   up.forEach(r=>snap[r.chave]=cur[r.chave]);del.forEach(k=>delete snap[k]);
+  }while(again);
+  dirty=pending();setSync(dirty?'saving':'ok');
+  if(dirty){clearTimeout(saveT);saveT=setTimeout(flush,500)}
+ }catch(e){console.error(e);setSync('error');clearTimeout(retryT);retryT=setTimeout(flush,15000)}
+ finally{syncing=false}
+}
+async function pullRows(){
+ const rows=[];
+ for(let f=0;;f+=1000){const{data,error}=await sb.from('registros').select('chave,colecao,dados').order('chave').range(f,f+999);if(error)throw error;rows.push(...data);if(data.length<1000)break}
+ return rows;
+}
+async function refresh(){
+ if(!sb||!session||document.hidden||dirty||syncing||!document.getElementById('modal').classList.contains('hidden'))return;
+ try{
+  const rows=await pullRows();
+  if(dirty||syncing||!rows.length)return;
+  const old=db;db=fromRows(rows);const ns=flatten();
+  const ks=Object.keys(ns),same=ks.length===Object.keys(snap).length&&ks.every(k=>snap[k]===ns[k]);
+  if(same)db=old;else{snap=ns;render()}
+  setSync('ok');
+ }catch(e){}
+}
+async function start(){
+ showGate('loading');
+ try{
+  const rows=await pullRows();
+  if(rows.length){db=fromRows(rows);snap=flatten();dirty=false}else{db=defaultDB();snap={};save()}
+ }catch(e){console.error(e);showGate('error',(e&&e.message)||String(e));return}
+ document.body.classList.remove('locked');hideGate();
+ buildNav();render();setSync(dirty?'saving':'ok');
+ clearInterval(pollT);pollT=setInterval(refresh,45000);
+}
+/* --- login --- */
+function gateHTML(kind,msg){
+ const logo='<div class="logo"><div class="mono">GR</div><div class="nm">GABRIELA RIBEIRO</div><div class="sb">Studio Beauty</div></div>';
+ const err=`<div class="gerr">${esc(msg||'')}</div>`;
+ if(kind==='loading')return`<div class="gbox">${logo}<p class="muted" style="text-align:center">Carregando seus dados…</p></div>`;
+ if(kind==='error')return`<div class="gbox">${logo}${err}<button class="btn gold" onclick="boot()">Tentar de novo</button><button class="glink" onclick="sair()">Sair</button></div>`;
+ if(kind==='setup')return`<div class="gbox">${logo}<form onsubmit="salvarSetup(event)"><label>URL do projeto Supabase<input name="url" placeholder="https://xxxx.supabase.co" required></label><label>Chave pública (anon key)<input name="key" required></label>${err}<button class="btn gold">Conectar</button></form></div>`;
+ if(kind==='forgot')return`<div class="gbox">${logo}<form onsubmit="esqueci(event)"><p class="muted sm" style="margin-bottom:14px">Digite o e-mail de acesso. Enviaremos um link para criar uma nova senha.</p><label>E-mail<input type="email" name="u" autocomplete="username" autocapitalize="none" required autofocus></label>${err}<button class="btn gold">Enviar link</button></form><button class="glink" onclick="showGate('login')">Voltar</button></div>`;
+ if(kind==='sent')return`<div class="gbox">${logo}<div class="ginfo">${esc(msg||'')}</div><button class="btn gold" onclick="showGate('login')">Voltar ao login</button></div>`;
+ if(kind==='newpass')return`<div class="gbox">${logo}<form onsubmit="novaSenha(event)"><p class="muted sm" style="margin-bottom:14px">Crie sua nova senha (mínimo 6 caracteres).</p><label>Nova senha<input type="password" name="p1" autocomplete="new-password" minlength="6" required autofocus></label><label>Repita a senha<input type="password" name="p2" autocomplete="new-password" minlength="6" required></label>${err}<button class="btn gold">Salvar senha</button></form></div>`;
+ return`<div class="gbox">${logo}<form onsubmit="entrar(event)"><label>E-mail<input type="email" name="u" autocomplete="username" autocapitalize="none" autocorrect="off" required autofocus></label><label>Senha<input type="password" name="p" autocomplete="current-password" required></label>${err}<button class="btn gold">Entrar</button></form><button class="glink" onclick="showGate('forgot')">Esqueci minha senha</button>${SB_URL?'':'<button class="glink" onclick="showGate(\'setup\')">Configurar conexão</button>'}</div>`;
+}
+function showGate(kind,msg){const g=document.getElementById('gate');g.innerHTML=gateHTML(kind,msg);g.classList.remove('hidden');document.body.classList.add('locked')}
+function hideGate(){const g=document.getElementById('gate');g.classList.add('hidden');g.innerHTML=''}
+function salvarSetup(e){e.preventDefault();const f=new FormData(e.target);try{localStorage.setItem('gr_sb_cfg',JSON.stringify({url:String(f.get('url')).trim(),key:String(f.get('key')).trim()}))}catch(x){}location.reload()}
+async function entrar(e){
+ e.preventDefault();const f=new FormData(e.target);
+ const u=String(f.get('u')).trim().toLowerCase();
+ const b=e.target.querySelector('button');b.disabled=true;b.textContent='Entrando…';
+ let r;try{r=await sb.auth.signInWithPassword({email:u,password:String(f.get('p'))})}catch(x){r={error:x}}
+ if(r.error){showGate('login',/invalid|credential/i.test(r.error.message)?'Usuário ou senha incorretos.':'Não foi possível entrar: '+r.error.message);return}
+ session=r.data.session;start();
+}
+async function esqueci(e){
+ e.preventDefault();const f=new FormData(e.target),u=String(f.get('u')).trim().toLowerCase();
+ const b=e.target.querySelector('button');b.disabled=true;b.textContent='Enviando…';
+ const{error}=await sb.auth.resetPasswordForEmail(u,{redirectTo:location.origin+location.pathname});
+ if(error){showGate('forgot',/rate|seconds|limit/i.test(error.message)?'Aguarde um minuto antes de pedir outro link.':'Não foi possível enviar: '+error.message);return}
+ showGate('sent','Pronto! Se esse e-mail tiver acesso, o link chega em instantes. Olhe também a caixa de spam.');
+}
+async function novaSenha(e){
+ e.preventDefault();const f=new FormData(e.target),a=String(f.get('p1')),c=String(f.get('p2'));
+ if(a!==c){showGate('newpass','As senhas não são iguais.');return}
+ if(a.length<6){showGate('newpass','Use pelo menos 6 caracteres.');return}
+ const{error}=await sb.auth.updateUser({password:a});
+ if(error){showGate('newpass','Não foi possível salvar: '+error.message);return}
+ recovering=false;try{history.replaceState(null,'',location.pathname)}catch(x){}
+ toast('Senha alterada ✓');start();
+}
+function formSenha(){openModal('Trocar senha',`<form onsubmit="salvarSenha(event)"><label>Nova senha<input type="password" name="p1" minlength="6" autocomplete="new-password" required></label><label>Repita a senha<input type="password" name="p2" minlength="6" autocomplete="new-password" required></label><div class="mfoot"><button class="btn gold">Salvar senha</button></div></form>`)}
+async function salvarSenha(e){
+ e.preventDefault();const f=new FormData(e.target),a=String(f.get('p1'));
+ if(a!==String(f.get('p2'))){toast('As senhas não são iguais');return}
+ const{error}=await sb.auth.updateUser({password:a});
+ if(error){toast('Não foi possível trocar: '+error.message);return}
+ closeModal();toast('Senha alterada ✓');
+}
+async function sair(){
+ if(dirty&&!confirm('Há alterações ainda não salvas. Sair mesmo assim?'))return;
+ try{if(sb)await sb.auth.signOut()}catch(e){}
+ session=null;db=defaultDB();snap={};dirty=false;clearInterval(pollT);showGate('login');
+}
+async function boot(){
+ const c=sbCfg();
+ if(!c.url||!c.key){showGate('setup');return}
+ if(!window.supabase){showGate('error','Não foi possível carregar a conexão. Verifique a internet.');return}
+ if(!sb){
+  sb=window.supabase.createClient(c.url,c.key,{auth:{persistSession:true,autoRefreshToken:true}});
+  sb.auth.onAuthStateChange((ev,s)=>{session=s;if(ev==='PASSWORD_RECOVERY'){recovering=true;showGate('newpass');return}if(ev==='SIGNED_OUT'){document.body.classList.add('locked');clearInterval(pollT);showGate('login')}});
+ }
+ let r;try{r=await sb.auth.getSession()}catch(e){showGate('error',String(e.message||e));return}
+ session=r.data.session;
+ if(recovering){showGate('newpass');return}
+ if(!session){showGate('login');return}
+ start();
+}
+const cli=id=>db.clientes.find(c=>c.id===id)||{id:'',nome:'(cliente removida)',tel:'',nasc:''};
+const srv=id=>db.servicos.find(s=>s.id===id)||{nome:'(serviço removido)',preco:0,duracao:60,manutDias:0,sinal:0};
+
+/* ============ FINANCEIRO AUTOMÁTICO ============ */
+function syncFin(a){
+ db.lancamentos=db.lancamentos.filter(l=>l.agId!==a.id);
+ const c=cli(a.clienteId),s=srv(a.servicoId),sin=a.sinalPago?(+a.sinal||0):0;
+ if(sin>0)db.lancamentos.push({id:uid(),tipo:'receita',data:a.sinalData||a.data,desc:`Sinal · ${s.nome} · ${c.nome}`,valor:sin,cat:'Sinal',pag:'PIX',agId:a.id});
+ if(a.status==='concluido'){const rest=Math.max(0,(+a.valor||0)-sin);if(rest>0)db.lancamentos.push({id:uid(),tipo:'receita',data:a.data,desc:`${s.nome} · ${c.nome}`,valor:rest,cat:'Atendimento',pag:a.pagamento||'',agId:a.id})}
+}
+function totais(mes){let rec=0,desp=0;for(const l of db.lancamentos){if(!String(l.data).startsWith(mes))continue;if(l.tipo==='receita')rec+=+l.valor||0;else desp+=+l.valor||0}return{rec,desp,luc:rec-desp}}
+const alertLevel=e=>{const q=+e.qtd||0,m=+(e.min??1);return q<=0?2:q<=m?1:0};
+
+/* ============ MENSAGENS AUTOMÁTICAS ============ */
+function filaMensagens(){
+ const t=today(),amanha=addDays(t,1),out=[];
+ for(const a of db.agendamentos){
+  if(!ATIVO(a.status))continue;
+  const c=cli(a.clienteId);
+  if(a.data===t||a.data===amanha)out.push({tipo:'lembrete',key:'lemb-'+a.id,ag:a,cliente:c,quando:a.data===t?'Hoje':'Amanhã'});
+  if(+a.sinal>0&&!a.sinalPago&&a.data>=t)out.push({tipo:'sinal',key:'sinal-'+a.id,ag:a,cliente:c,quando:brDate(a.data)});
+ }
+ const lim=+db.config.antecedenciaManut||0;
+ for(const c of db.clientes){
+  const feitos=db.agendamentos.filter(a=>a.clienteId===c.id&&a.status==='concluido'&&+srv(a.servicoId).manutDias>0).sort(byDT);
+  if(!feitos.length)continue;
+  const u=feitos[feitos.length-1],due=addDays(u.data,+srv(u.servicoId).manutDias);
+  if(db.agendamentos.some(a=>a.clienteId===c.id&&ATIVO(a.status)&&a.data>=u.data))continue;
+  const falta=diffDays(t,due);
+  if(falta<=lim&&falta>=-60)out.push({tipo:'manutencao',key:'manut-'+u.id,ag:u,cliente:c,due,falta,quando:falta<0?`venceu há ${-falta} dia(s)`:falta===0?'vence hoje':`faltam ${falta} dia(s)`});
+ }
+ for(const c of db.clientes)if(c.nasc&&c.nasc.slice(5)===t.slice(5))out.push({tipo:'aniversario',key:`aniv-${c.id}-${t.slice(0,4)}`,cliente:c,quando:'Hoje'});
+ return out;
+}
+function montar(i){
+ const a=i.ag,s=a?srv(a.servicoId):{},c=i.cliente,cf=db.config;
+ const map={nome:(c.nome||'').trim().split(' ')[0],nome_completo:c.nome,servico:s.nome||'',data:i.tipo==='manutencao'?brDate(i.due):a?brDate(a.data):'',dia_semana:a?weekday(a.data):'',hora:a?a.hora:'',valor:a?money(a.valor):'',sinal:a?money(a.sinal):'',pix:cf.pix||'(cadastre a chave PIX em Ajustes)',studio:cf.studio,endereco:cf.endereco,profissional:cf.profissional};
+ return(cf.tpl[i.tipo]||'').replace(/\{(\w+)\}/g,(m,k)=>k in map?map[k]:m);
+}
+function waLink(tel,msg){let d=String(tel||'').replace(/\D/g,'');if(d.length===10||d.length===11)d='55'+d;return`https://wa.me/${d}${msg?'?text='+encodeURIComponent(msg):''}`}
+function enviar(key){const i=filaMensagens().find(x=>x.key===key);if(!i)return;if(!i.cliente.tel){toast('Cliente sem telefone cadastrado');return}window.open(waLink(i.cliente.tel,montar(i)),'_blank');db.enviados[key]=new Date().toISOString();save();render()}
+function marcar(key,v){if(v)db.enviados[key]=new Date().toISOString();else delete db.enviados[key];save();render()}
+function marcarSinal(id){const a=db.agendamentos.find(x=>x.id===id);if(!a)return;a.sinalPago=true;a.sinalData=today();if(a.status==='agendado')a.status='confirmado';syncFin(a);save();toast('Sinal registrado no caixa ✓');render()}
+
+/* ============ NAVEGAÇÃO ============ */
+const NAV=[['inicio','Início'],['agenda','Agenda'],['clientes','Clientes'],['mensagens','Mensagens'],['servicos','Serviços'],['estoque','Estoque'],['financeiro','Financeiro'],['ajustes','Ajustes']];
+const ICON={
+ inicio:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
+ agenda:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+ clientes:'<circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-7 7-7s7 3 7 7M16 4a4 4 0 0 1 0 8M22 21c0-3-2-5.5-4.5-6.5"/>',
+ mensagens:'<path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z"/>',
+ servicos:'<path d="M12 3l2.2 5.8L20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2z"/>',
+ estoque:'<path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+ financeiro:'<path d="M4 20V11M10 20V5M16 20v-7M22 21H2"/>',
+ ajustes:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>'
+};
+let route='inicio';
+const VIEWS={inicio:vInicio,agenda:vAgenda,clientes:vClientes,mensagens:vMensagens,servicos:vServicos,estoque:vEstoque,financeiro:vFinanceiro,ajustes:vAjustes};
+function buildNav(){const h=NAV.map(([r,t])=>`<button class="nb" data-r="${r}" onclick="go('${r}')"><svg viewBox="0 0 24 24">${ICON[r]}</svg><span>${t}</span><em class="badge" data-b="${r}" hidden></em></button>`).join('');document.getElementById('navSide').innerHTML=h;document.getElementById('navBottom').innerHTML=h}
+function updateBadges(){const m=filaMensagens().filter(i=>!db.enviados[i.key]).length,e=db.estoque.filter(x=>alertLevel(x)>0).length;document.querySelectorAll('[data-b]').forEach(b=>{const v=b.dataset.b==='mensagens'?m:b.dataset.b==='estoque'?e:0;b.hidden=!v;b.textContent=v})}
+function go(r){route=r;render();window.scrollTo(0,0)}
+function render(){document.getElementById('view').innerHTML=VIEWS[route]();document.querySelectorAll('[data-r]').forEach(b=>b.classList.toggle('on',b.dataset.r===route));updateBadges()}
+
+/* ============ INÍCIO ============ */
+function vInicio(){
+ const t=today(),mes=t.slice(0,7),{rec,desp,luc}=totais(mes),nm=nomeMes(t);
+ const hoje=db.agendamentos.filter(a=>a.data===t&&a.status!=='cancelado').sort(byTime);
+ const baixo=db.estoque.filter(e=>alertLevel(e)>0);
+ const pend=filaMensagens().filter(i=>!db.enviados[i.key]);
+ const aniv=db.clientes.filter(c=>c.nasc&&c.nasc.slice(5,7)===t.slice(5,7)).sort((a,b)=>a.nasc.slice(8).localeCompare(b.nasc.slice(8)));
+ const semBackup=!db.ultimoBackup||diffDays(db.ultimoBackup,t)>7;
+ return`<div class="head"><div><div class="eyebrow">${weekday(t)} · ${brDate(t)}</div><h1>Olá, ${esc(db.config.profissional)} ✨</h1></div><button class="btn gold" onclick="formAg()">+ Agendar</button></div>
+ <div class="kpis">
+  <div class="kpi"><span>Atendimentos hoje</span><b>${hoje.length}</b></div>
+  <div class="kpi"><span>Faturamento · ${nm}</span><b>${money(rec)}</b></div>
+  <div class="kpi"><span>Despesas · ${nm}</span><b>${money(desp)}</b></div>
+  <div class="kpi ${luc<0?'neg':'pos'}"><span>Lucro líquido</span><b>${money(luc)}</b></div>
+ </div>
+ <div class="grid2">
+  <div class="card"><h2>Agenda de hoje</h2>${hoje.length?hoje.map(a=>agItem(a)).join(''):empty('Nenhum horário marcado para hoje.')}</div>
+  <div>
+   <div class="card"><h2>Avisos</h2>
+    <div class="al"><span>💬 ${pend.length?`<b>${pend.length}</b> mensage${pend.length>1?'ns':'m'} para enviar`:'Nenhuma mensagem pendente'}</span>${pend.length?`<button class="btn wa sm" onclick="go('mensagens')">Ver</button>`:''}</div>
+    ${baixo.map(e=>`<div class="al"><span>${alertLevel(e)===2?'⛔':'⚠️'} <b>${esc(e.nome)}</b> — ${alertLevel(e)===2?'esgotado':`resta ${e.qtd} ${esc(e.unidade||'un.')}`}</span><button class="btn ghost sm" onclick="compraEst('${e.id}')">Repor</button></div>`).join('')}
+    ${semBackup?`<div class="al"><span>💾 Faça o backup semanal dos dados</span><button class="btn ghost sm" onclick="exportar()">Baixar</button></div>`:''}
+   </div>
+   <div class="card"><h2>Aniversariantes de ${nm}</h2>${aniv.length?aniv.map(c=>`<div class="al"><span>🎂 <b>${esc(c.nome)}</b> · ${brDate(c.nasc).slice(0,5)}</span>${c.tel?`<a class="ib wa" target="_blank" rel="noopener" href="${waLink(c.tel)}">✆</a>`:''}</div>`).join(''):empty('Nenhum aniversário este mês.')}</div>
+  </div>
+ </div>`;
+}
+
+/* ============ AGENDA ============ */
+let agDate=today();
+function setAg(s){if(s){agDate=s;render()}}
+function agItem(a,showDate){
+ const c=cli(a.clienteId),s=srv(a.servicoId);
+ const sc=+a.sinal>0?(a.sinalPago?'<span class="chip ok">Sinal pago</span>':'<span class="chip warn">Sinal pendente</span>'):'';
+ const dt=showDate==='full'?brDate(a.data):brDate(a.data).slice(0,5);
+ return`<div class="ag st-${a.status}">
+  <div class="ag-t"><b>${esc(a.hora)}</b>${showDate?`<small>${dt}</small>`:''}</div>
+  <div class="ag-i"><div class="ag-n">${esc(c.nome)}</div><div class="ag-s">${esc(s.nome)} · ${money(a.valor)}</div><div class="chips"><span class="chip s-${a.status}">${STATUS[a.status]||a.status}</span>${sc}</div></div>
+  <div class="ag-a">
+   ${ATIVO(a.status)?`<button class="ib ok" title="Concluir atendimento" onclick="formConcluir('${a.id}')">✓</button>`:''}
+   ${c.tel?`<a class="ib wa" title="WhatsApp" target="_blank" rel="noopener" href="${waLink(c.tel)}">✆</a>`:''}
+   <button class="ib" title="Editar" onclick="formAg('${a.id}')">✎</button>
+  </div></div>`;
+}
+function vAgenda(){
+ const ini=addDays(agDate,-parse(agDate).getDay()),days=[...Array(7)].map((_,i)=>addDays(ini,i));
+ const cnt=s=>db.agendamentos.filter(a=>a.data===s&&a.status!=='cancelado').length;
+ const list=db.agendamentos.filter(a=>a.data===agDate).sort(byTime);
+ const prox=db.agendamentos.filter(a=>a.data>agDate&&a.data<=addDays(agDate,14)&&ATIVO(a.status)).sort(byDT);
+ const prev=list.filter(a=>a.status!=='cancelado'&&a.status!=='faltou').reduce((s,a)=>s+(+a.valor||0),0);
+ return`<div class="head"><div><div class="eyebrow">Agenda</div><h1>${weekday(agDate)}, ${brDate(agDate)}</h1></div><button class="btn gold" onclick="formAg()">+ Agendar</button></div>
+ <div class="week"><button class="nav" onclick="setAg(addDays(agDate,-7))">‹</button>${days.map(s=>`<button class="day ${s===agDate?'on':''} ${s===today()?'td':''}" onclick="setAg('${s}')"><span>${WEEK[parse(s).getDay()].slice(0,3)}</span><b>${s.slice(8)}</b><i>${cnt(s)||''}</i></button>`).join('')}<button class="nav" onclick="setAg(addDays(agDate,7))">›</button></div>
+ <div class="tools"><input type="date" value="${agDate}" onchange="setAg(this.value)"><button class="btn ghost sm" onclick="setAg(today())">Hoje</button><span class="muted">Previsto no dia: <b class="gold-t">${money(prev)}</b></span></div>
+ <div class="card"><h2>Horários do dia</h2>${list.length?list.map(a=>agItem(a)).join(''):empty('Nenhum horário neste dia.')}</div>
+ <div class="card"><h2>Próximos 14 dias</h2>${prox.length?prox.map(a=>agItem(a,true)).join(''):empty('Sem agendamentos futuros.')}</div>`;
+}
+function formAg(id,preCli,preData){
+ const a=id?db.agendamentos.find(x=>x.id===id):{clienteId:preCli||'',servicoId:'',data:preData||(route==='agenda'?agDate:today()),hora:'09:00',valor:'',sinal:'',sinalPago:false,status:'agendado',pagamento:'PIX',obs:''};
+ if(!a)return;
+ const cliOpts=[...db.clientes].sort((x,y)=>x.nome.localeCompare(y.nome)).map(c=>`<option value="${c.id}" ${c.id===a.clienteId?'selected':''}>${esc(c.nome)}${c.tel?' · '+esc(fone(c.tel)):''}</option>`).join('');
+ const srvOpts=db.servicos.map(s=>`<option value="${s.id}" ${s.id===a.servicoId?'selected':''}>${esc(s.nome)} — ${money(s.preco)}</option>`).join('');
+ openModal(id?'Editar agendamento':'Novo agendamento',`<form onsubmit="salvarAg(event,'${id||''}')">
+  <label>Cliente<select name="clienteId" onchange="document.getElementById('novaCli').style.display=this.value==='__novo'?'block':'none'" required><option value="">Selecione…</option><option value="__novo">+ Nova cliente</option>${cliOpts}</select></label>
+  <div id="novaCli" class="sub" style="display:none"><label>Nome completo<input name="nNome"></label><div class="row"><label>WhatsApp<input name="nTel" inputmode="tel" placeholder="(11) 90000-0000"></label><label>Nascimento<input type="date" name="nNasc"></label></div></div>
+  <label>Serviço<select name="servicoId" onchange="pickSrv(this)" required><option value="">Selecione…</option>${srvOpts}</select></label>
+  <div class="row"><label>Data<input type="date" name="data" value="${a.data}" required></label><label>Horário<input type="time" name="hora" value="${a.hora}" required></label></div>
+  <div class="row"><label>Valor (R$)<input type="number" step="0.01" min="0" name="valor" value="${a.valor}" required></label><label>Sinal (R$)<input type="number" step="0.01" min="0" name="sinal" value="${a.sinal}"></label></div>
+  <label class="check"><input type="checkbox" name="sinalPago" ${a.sinalPago?'checked':''}> Sinal já foi pago</label>
+  <div class="row"><label>Status<select name="status">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${k===a.status?'selected':''}>${v}</option>`).join('')}</select></label><label>Pagamento<select name="pagamento">${PAGS.map(p=>`<option ${p===a.pagamento?'selected':''}>${p}</option>`).join('')}</select></label></div>
+  <label>Observações<textarea name="obs" rows="2">${esc(a.obs)}</textarea></label>
+  <div class="mfoot">${id?`<button type="button" class="btn danger" onclick="delAg('${id}')">Excluir</button>`:''}<button class="btn gold">Salvar</button></div>
+ </form>`);
+}
+function pickSrv(sel){const s=db.servicos.find(x=>x.id===sel.value);if(!s)return;const el=sel.form.elements;el.valor.value=s.preco;el.sinal.value=+s.sinal?s.sinal:''}
+function salvarAg(e,id){
+ e.preventDefault();const f=new FormData(e.target),g=k=>String(f.get(k)||'').trim();
+ const a={id:id||uid(),clienteId:g('clienteId'),servicoId:g('servicoId'),data:g('data'),hora:g('hora'),valor:+g('valor')||0,sinal:+g('sinal')||0,sinalPago:f.get('sinalPago')==='on',status:g('status')||'agendado',pagamento:g('pagamento'),obs:g('obs')};
+ if(a.clienteId==='__novo'&&!g('nNome')){toast('Informe o nome da nova cliente');return}
+ if(ATIVO(a.status)){
+  const ini=tmin(a.hora),fim=ini+(+srv(a.servicoId).duracao||60);
+  const conf=db.agendamentos.find(x=>x.id!==a.id&&x.data===a.data&&ATIVO(x.status)&&tmin(x.hora)<fim&&tmin(x.hora)+(+srv(x.servicoId).duracao||60)>ini);
+  if(conf&&!confirm(`Conflito: ${cli(conf.clienteId).nome} já está às ${conf.hora} (${srv(conf.servicoId).nome}). Agendar mesmo assim?`))return;
+ }
+ if(a.clienteId==='__novo'){const c={id:uid(),nome:g('nNome'),tel:g('nTel'),nasc:g('nNasc'),obs:'',criado:today()};db.clientes.push(c);a.clienteId=c.id}
+ const old=id?db.agendamentos.find(x=>x.id===id):null;
+ if(a.sinalPago)a.sinalData=(old&&old.sinalPago&&old.sinalData)||today();
+ if(old)Object.assign(old,a);else db.agendamentos.push(a);
+ syncFin(old||a);save();closeModal();toast('Agendamento salvo ✓');render();
+}
+function delAg(id){if(!confirm('Excluir este agendamento? Os lançamentos dele no financeiro também serão removidos.'))return;db.agendamentos=db.agendamentos.filter(a=>a.id!==id);db.lancamentos=db.lancamentos.filter(l=>l.agId!==id);save();closeModal();toast('Agendamento excluído');render()}
+function formConcluir(id){
+ const a=db.agendamentos.find(x=>x.id===id),c=cli(a.clienteId),s=srv(a.servicoId);
+ openModal('Concluir atendimento',`<form onsubmit="concluir(event,'${id}')"><p class="muted" style="margin-bottom:12px">${esc(c.nome)} · ${esc(s.nome)} · ${brDate(a.data)} ${esc(a.hora)}</p>
+ <div class="row"><label>Valor final (R$)<input type="number" step="0.01" min="0" name="valor" value="${a.valor}"></label><label>Pagamento<select name="pagamento">${PAGS.map(p=>`<option ${p===a.pagamento?'selected':''}>${p}</option>`).join('')}</select></label></div>
+ ${+a.sinal>0?`<label class="check"><input type="checkbox" name="sinalPago" ${a.sinalPago?'checked':''}> Sinal de ${money(a.sinal)} foi pago (abate do valor)</label>`:''}
+ <div class="mfoot"><button class="btn gold">Concluir e lançar no caixa</button></div></form>`);
+}
+function concluir(e,id){e.preventDefault();const f=new FormData(e.target),a=db.agendamentos.find(x=>x.id===id);a.valor=+f.get('valor')||0;a.pagamento=f.get('pagamento');if(+a.sinal>0){const p=f.get('sinalPago')==='on';if(p&&!a.sinalPago)a.sinalData=today();a.sinalPago=p}a.status='concluido';syncFin(a);save();closeModal();toast('Atendimento concluído ✓');render()}
+
+/* ============ CLIENTES ============ */
+let cliQ='';
+function cliRows(){
+ const q=cliQ.toLowerCase().trim(),dig=cliQ.replace(/\D/g,''),mes=today().slice(5,7);
+ const l=db.clientes.filter(c=>!q||c.nome.toLowerCase().includes(q)||(dig&&String(c.tel).replace(/\D/g,'').includes(dig))).sort((a,b)=>a.nome.localeCompare(b.nome));
+ if(!l.length)return empty(db.clientes.length?'Nenhuma cliente encontrada.':'Cadastre sua primeira cliente.');
+ return l.map(c=>{const ags=db.agendamentos.filter(a=>a.clienteId===c.id&&a.status==='concluido').sort(byDT),u=ags[ags.length-1];
+  return`<div class="cli"><div class="av">${esc((c.nome.trim()[0]||'?').toUpperCase())}</div><div class="cli-i"><div class="ag-n">${esc(c.nome)}${c.nasc&&c.nasc.slice(5,7)===mes?` <span class="chip gold">🎂 ${brDate(c.nasc).slice(0,5)}</span>`:''}</div><div class="ag-s">${esc(fone(c.tel))||'sem telefone'}${c.nasc?' · '+idade(c.nasc)+' anos':''} · ${ags.length} atend.${u?' · último '+brDate(u.data):''}</div></div>
+  <div class="ag-a">${c.tel?`<a class="ib wa" title="WhatsApp" target="_blank" rel="noopener" href="${waLink(c.tel)}">✆</a>`:''}<button class="ib" title="Agendar" onclick="formAg(null,'${c.id}')">+</button><button class="ib" title="Histórico" onclick="histCli('${c.id}')">☰</button><button class="ib" title="Editar" onclick="formCli('${c.id}')">✎</button></div></div>`}).join('');
+}
+function vClientes(){return`<div class="head"><div><div class="eyebrow">Clientes</div><h1>${db.clientes.length} cadastrada${db.clientes.length===1?'':'s'}</h1></div><button class="btn gold" onclick="formCli()">+ Cliente</button></div>
+ <input class="search" placeholder="Buscar por nome ou telefone…" value="${esc(cliQ)}" oninput="cliQ=this.value;document.getElementById('cliList').innerHTML=cliRows()">
+ <div class="card" id="cliList">${cliRows()}</div>`}
+function formCli(id){const c=id?db.clientes.find(x=>x.id===id):{nome:'',tel:'',nasc:'',obs:''};
+ openModal(id?'Editar cliente':'Nova cliente',`<form onsubmit="salvarCli(event,'${id||''}')">
+ <label>Nome completo<input name="nome" value="${esc(c.nome)}" required></label>
+ <div class="row"><label>WhatsApp<input name="tel" inputmode="tel" value="${esc(c.tel)}" placeholder="(11) 90000-0000"></label><label>Data de nascimento<input type="date" name="nasc" value="${c.nasc||''}"></label></div>
+ <label>Observações (alergias, curvatura, preferências…)<textarea name="obs" rows="3">${esc(c.obs)}</textarea></label>
+ <div class="mfoot">${id?`<button type="button" class="btn danger" onclick="delCli('${id}')">Excluir</button>`:''}<button class="btn gold">Salvar</button></div></form>`)}
+function salvarCli(e,id){e.preventDefault();const f=new FormData(e.target),d={nome:String(f.get('nome')).trim(),tel:String(f.get('tel')).trim(),nasc:f.get('nasc')||'',obs:String(f.get('obs')).trim()};
+ const dig=d.tel.replace(/\D/g,'');if(dig){const dup=db.clientes.find(c=>c.id!==id&&String(c.tel).replace(/\D/g,'')===dig);if(dup&&!confirm(`Esse telefone já está cadastrado para ${dup.nome}. Salvar mesmo assim?`))return}
+ if(id)Object.assign(db.clientes.find(x=>x.id===id),d);else db.clientes.push({id:uid(),criado:today(),...d});save();closeModal();toast('Cliente salva ✓');render()}
+function delCli(id){if(!confirm('Excluir esta cliente? O histórico de atendimentos continua no financeiro.'))return;db.clientes=db.clientes.filter(c=>c.id!==id);save();closeModal();toast('Cliente excluída');render()}
+function histCli(id){const c=cli(id),l=db.agendamentos.filter(a=>a.clienteId===id).sort(byDT).reverse(),feitos=l.filter(a=>a.status==='concluido'),tot=feitos.reduce((s,a)=>s+(+a.valor||0),0);
+ openModal(c.nome,`<p class="muted">${esc(fone(c.tel))}${c.nasc?' · nasc. '+brDate(c.nasc):''}</p>${c.obs?`<div class="banner sm" style="margin:10px 0 0">${esc(c.obs)}</div>`:''}
+ <div class="kpis" style="grid-template-columns:1fr 1fr;margin-top:12px"><div class="kpi"><span>Atendimentos</span><b>${feitos.length}</b></div><div class="kpi"><span>Total gasto</span><b>${money(tot)}</b></div></div>
+ ${l.length?l.map(a=>agItem(a,'full')).join(''):empty('Sem atendimentos ainda.')}
+ <div class="mfoot"><button class="btn gold" onclick="formAg(null,'${id}')">+ Agendar</button></div>`)}
+
+/* ============ SERVIÇOS ============ */
+function vServicos(){return`<div class="head"><div><div class="eyebrow">Serviços</div><h1>Tabela de serviços</h1></div><button class="btn gold" onclick="formSrv()">+ Serviço</button></div>
+ <div class="srvs">${db.servicos.map(s=>`<div class="srv" onclick="formSrv('${s.id}')"><div class="srv-n">${esc(s.nome)}</div><div class="srv-p">${money(s.preco)}</div><div class="ag-s">⏱ ${s.duracao} min${+s.sinal>0?' · sinal '+money(s.sinal):''}</div><div class="ag-s">${+s.manutDias>0?'🔁 manutenção a cada '+s.manutDias+' dias':'sem manutenção'}</div></div>`).join('')||empty('Cadastre seus serviços.')}</div>`}
+function formSrv(id){const s=id?db.servicos.find(x=>x.id===id):{nome:'',preco:'',duracao:60,sinal:'',manutDias:0};
+ openModal(id?'Editar serviço':'Novo serviço',`<form onsubmit="salvarSrv(event,'${id||''}')"><label>Nome do serviço<input name="nome" value="${esc(s.nome)}" required></label>
+ <div class="row"><label>Preço (R$)<input type="number" step="0.01" min="0" name="preco" value="${s.preco}" required></label><label>Duração (min)<input type="number" min="5" name="duracao" value="${s.duracao}"></label></div>
+ <div class="row"><label>Sinal (R$)<input type="number" step="0.01" min="0" name="sinal" value="${s.sinal}"></label><label>Manutenção a cada (dias)<input type="number" min="0" name="manutDias" value="${s.manutDias}"></label></div>
+ <p class="muted sm">Manutenção 0 = o serviço não gera lembrete de manutenção. Sinal 0 = não cobra sinal.</p>
+ <div class="mfoot">${id?`<button type="button" class="btn danger" onclick="delSrv('${id}')">Excluir</button>`:''}<button class="btn gold">Salvar</button></div></form>`)}
+function salvarSrv(e,id){e.preventDefault();const f=new FormData(e.target),d={nome:String(f.get('nome')).trim(),preco:+f.get('preco')||0,duracao:+f.get('duracao')||60,sinal:+f.get('sinal')||0,manutDias:+f.get('manutDias')||0};if(id)Object.assign(db.servicos.find(x=>x.id===id),d);else db.servicos.push({id:uid(),...d});save();closeModal();toast('Serviço salvo ✓');render()}
+function delSrv(id){if(!confirm('Excluir este serviço?'))return;db.servicos=db.servicos.filter(s=>s.id!==id);save();closeModal();render()}
+
+/* ============ ESTOQUE ============ */
+function vEstoque(){
+ const l=[...db.estoque].sort((a,b)=>alertLevel(b)-alertLevel(a)||a.nome.localeCompare(b.nome));
+ const baixo=db.estoque.filter(e=>alertLevel(e)>0).length,val=db.estoque.reduce((s,e)=>s+(+e.qtd||0)*(+e.custo||0),0);
+ return`<div class="head"><div><div class="eyebrow">Estoque</div><h1>${db.estoque.length} produto${db.estoque.length===1?'':'s'}</h1></div><button class="btn gold" onclick="formEst()">+ Produto</button></div>
+ <div class="kpis k3"><div class="kpi ${baixo?'neg':''}"><span>Para repor</span><b>${baixo}</b></div><div class="kpi"><span>Valor em estoque</span><b>${money(val)}</b></div><div class="kpi"><span>Itens cadastrados</span><b>${db.estoque.length}</b></div></div>
+ <div class="card">${l.length?l.map(e=>{const lv=alertLevel(e),u=esc(e.unidade||'un.');return`<div class="est lv${lv}"><div class="est-i"><div class="ag-n">${esc(e.nome)} ${lv===2?'<span class="chip bad">Esgotado</span>':lv===1?`<span class="chip warn">${+e.qtd===1?'Última unidade':'Repor'}</span>`:''}</div><div class="ag-s">${+e.custo?money(e.custo)+' / '+u+' · ':''}alerta com ${e.min??1} ${u}</div></div>
+  <div class="qty"><button class="ib" onclick="ajEst('${e.id}',-1)">−</button><b>${e.qtd}</b><button class="ib" onclick="ajEst('${e.id}',1)">+</button></div>
+  <button class="btn ghost sm" onclick="compraEst('${e.id}')">Entrada</button><button class="ib" title="Editar" onclick="formEst('${e.id}')">✎</button></div>`}).join(''):empty('Cadastre seus produtos (cola, fios, henna, removedor, primer…).')}</div>`}
+function ajEst(id,d){const e=db.estoque.find(x=>x.id===id);e.qtd=Math.max(0,(+e.qtd||0)+d);save();render();const lv=alertLevel(e);if(d<0&&lv===1)toast(`⚠️ ${e.nome}: resta só ${e.qtd} — hora de repor`);else if(d<0&&lv===2)toast(`⛔ ${e.nome} esgotou`)}
+function formEst(id){const e=id?db.estoque.find(x=>x.id===id):{nome:'',qtd:0,min:1,unidade:'un.',custo:''};
+ openModal(id?'Editar produto':'Novo produto',`<form onsubmit="salvarEst(event,'${id||''}')"><label>Produto<input name="nome" value="${esc(e.nome)}" placeholder="Ex.: Cola Elite 3ml" required></label>
+ <div class="row"><label>Quantidade atual<input type="number" min="0" name="qtd" value="${e.qtd}"></label><label>Unidade<input name="unidade" value="${esc(e.unidade||'un.')}" placeholder="un., frasco, caixa"></label></div>
+ <div class="row"><label>Avisar quando restar<input type="number" min="0" name="min" value="${e.min??1}"></label><label>Custo unitário (R$)<input type="number" step="0.01" min="0" name="custo" value="${e.custo}"></label></div>
+ <div class="mfoot">${id?`<button type="button" class="btn danger" onclick="delEst('${id}')">Excluir</button>`:''}<button class="btn gold">Salvar</button></div></form>`)}
+function salvarEst(ev,id){ev.preventDefault();const f=new FormData(ev.target),d={nome:String(f.get('nome')).trim(),qtd:+f.get('qtd')||0,unidade:String(f.get('unidade')).trim()||'un.',min:f.get('min')===''?1:+f.get('min'),custo:+f.get('custo')||0};if(id)Object.assign(db.estoque.find(x=>x.id===id),d);else db.estoque.push({id:uid(),...d});save();closeModal();toast('Produto salvo ✓');render()}
+function delEst(id){if(!confirm('Excluir este produto do estoque?'))return;db.estoque=db.estoque.filter(e=>e.id!==id);save();closeModal();render()}
+function compraEst(id){const e=db.estoque.find(x=>x.id===id);
+ openModal('Entrada de estoque',`<form onsubmit="salvarCompra(event,'${id}')"><p class="muted" style="margin-bottom:12px">${esc(e.nome)} · atual: ${e.qtd} ${esc(e.unidade||'un.')}</p>
+ <div class="row"><label>Quantidade comprada<input type="number" min="1" name="q" value="1" required></label><label>Valor total pago (R$)<input type="number" step="0.01" min="0" name="v" value="${+e.custo||''}"></label></div>
+ <label class="check"><input type="checkbox" name="desp" checked> Lançar como despesa no financeiro</label>
+ <div class="mfoot"><button class="btn gold">Dar entrada</button></div></form>`)}
+function salvarCompra(ev,id){ev.preventDefault();const f=new FormData(ev.target),e=db.estoque.find(x=>x.id===id),q=+f.get('q')||0,v=+f.get('v')||0;e.qtd=(+e.qtd||0)+q;if(v>0&&q>0)e.custo=+(v/q).toFixed(2);if(v>0&&f.get('desp')==='on')db.lancamentos.push({id:uid(),tipo:'despesa',data:today(),desc:`Compra: ${e.nome} (${q} ${e.unidade||'un.'})`,valor:v,cat:'Produtos / Material',pag:''});save();closeModal();toast('Estoque atualizado ✓');render()}
+
+/* ============ FINANCEIRO ============ */
+let finMes=today().slice(0,7);
+function bars(o){const e=Object.entries(o).sort((a,b)=>b[1]-a[1]),t=e.reduce((s,x)=>s+x[1],0);return e.length?e.map(([k,v])=>`<div class="bar"><div class="bar-h"><span>${esc(k)}</span><b>${money(v)}</b></div><div class="bar-t"><div class="bar-f" style="width:${t?v/t*100:0}%"></div></div></div>`).join(''):empty('Sem dados no mês.')}
+function vFinanceiro(){
+ const {rec,desp,luc}=totais(finMes),t=today();
+ const l=db.lancamentos.filter(x=>String(x.data).startsWith(finMes)).sort((a,b)=>b.data.localeCompare(a.data));
+ const previsto=db.agendamentos.filter(a=>a.data.startsWith(finMes)&&a.data>=t&&ATIVO(a.status)).reduce((s,a)=>s+(+a.valor||0)-(a.sinalPago?+a.sinal||0:0),0);
+ const feitos=db.agendamentos.filter(a=>a.data.startsWith(finMes)&&a.status==='concluido');
+ const ticket=feitos.length?feitos.reduce((s,a)=>s+(+a.valor||0),0)/feitos.length:0;
+ const cats={},pags={};
+ l.forEach(x=>{if(x.tipo==='despesa'){const k=x.cat||'Outros';cats[k]=(cats[k]||0)+(+x.valor||0)}else{const k=x.pag||'Não informado';pags[k]=(pags[k]||0)+(+x.valor||0)}});
+ const marg=rec?Math.round(luc/rec*100):0;
+ return`<div class="head"><div><div class="eyebrow">Financeiro</div><h1>${parse(finMes+'-01').toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}</h1></div><div class="btns"><button class="btn ghost" onclick="formLanc('receita')">+ Receita</button><button class="btn gold" onclick="formLanc('despesa')">+ Despesa</button></div></div>
+ <div class="tools"><input type="month" value="${finMes}" onchange="if(this.value){finMes=this.value;render()}"><button class="btn ghost sm" onclick="exportXlsx('mes')">⬇ Excel do mês</button><button class="btn ghost sm" onclick="exportXlsx('tudo')">⬇ Excel completo</button></div>
+ <div class="kpis">
+  <div class="kpi"><span>Faturamento</span><b>${money(rec)}</b></div>
+  <div class="kpi"><span>Despesas</span><b>${money(desp)}</b></div>
+  <div class="kpi ${luc<0?'neg':'pos'}"><span>Lucro líquido</span><b>${money(luc)}</b><small>margem ${marg}%</small></div>
+  <div class="kpi"><span>A receber (agendado)</span><b>${money(previsto)}</b></div>
+ </div>
+ <div class="grid2">
+  <div class="card"><h2>Lançamentos</h2>${l.length?l.map(x=>`<div class="lanc"><div class="lanc-d">${brDate(x.data).slice(0,5)}</div><div class="est-i"><div class="ag-n" style="font-size:16px">${esc(x.desc)}</div><div class="ag-s">${esc(x.cat||'')}${x.pag?' · '+esc(x.pag):''}${x.agId?' · via agenda':''}</div></div><b class="${x.tipo==='receita'?'pos':'neg'}">${x.tipo==='receita'?'+':'−'} ${money(x.valor)}</b>${x.agId?'':`<button class="ib" title="Excluir" onclick="delLanc('${x.id}')">✕</button>`}</div>`).join(''):empty('Nenhum lançamento neste mês.')}</div>
+  <div>
+   <div class="card"><h2>Atendimentos</h2><div class="al"><span>Concluídos no mês</span><b>${feitos.length}</b></div><div class="al"><span>Ticket médio</span><b>${money(ticket)}</b></div></div>
+   <div class="card"><h2>Despesas por categoria</h2>${bars(cats)}</div>
+   <div class="card"><h2>Recebido por forma de pagamento</h2>${bars(pags)}</div>
+  </div>
+ </div>`;
+}
+function formLanc(tipo){openModal(tipo==='despesa'?'Nova despesa':'Nova receita',`<form onsubmit="salvarLanc(event,'${tipo}')"><label>Descrição<input name="desc" required placeholder="${tipo==='despesa'?'Ex.: Aluguel da sala':'Ex.: Venda de sérum'}"></label>
+ <div class="row"><label>Valor (R$)<input type="number" step="0.01" min="0" name="valor" required></label><label>Data<input type="date" name="data" value="${today()}" required></label></div>
+ ${tipo==='despesa'?`<label>Categoria<select name="cat">${CATS.map(c=>`<option>${c}</option>`).join('')}</select></label>`:`<div class="row"><label>Categoria<select name="cat"><option>Venda de produto</option><option>Atendimento avulso</option><option>Curso / Mentoria</option><option>Outros</option></select></label><label>Pagamento<select name="pag">${PAGS.map(p=>`<option>${p}</option>`).join('')}</select></label></div>`}
+ <div class="mfoot"><button class="btn gold">Lançar</button></div></form>`)}
+function salvarLanc(e,tipo){e.preventDefault();const f=new FormData(e.target);db.lancamentos.push({id:uid(),tipo,desc:String(f.get('desc')).trim(),valor:+f.get('valor')||0,data:f.get('data'),cat:f.get('cat')||'',pag:f.get('pag')||''});save();closeModal();toast('Lançamento registrado ✓');render()}
+function delLanc(id){if(!confirm('Excluir este lançamento?'))return;db.lancamentos=db.lancamentos.filter(l=>l.id!==id);save();render()}
+
+
+function exportXlsx(modo){
+ if(typeof XLSX==='undefined'){toast('Biblioteca do Excel não carregou — verifique a internet');return}
+ const R='"R$" #,##0.00',D='dd/mm/yyyy';
+ const inr=d=>modo==='tudo'||String(d).startsWith(finMes);
+ const ser=s=>{const[y,m,d]=String(s).split('-').map(Number);return Math.round((Date.UTC(y,m-1,d)-Date.UTC(1899,11,30))/864e5)};
+ const L=db.lancamentos.filter(l=>inr(l.data)).sort((a,b)=>a.data.localeCompare(b.data));
+ const wb=XLSX.utils.book_new();
+ const mk=(aoa,w)=>{const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=w.map(x=>({wch:x}));return ws};
+ const fmt=(ws,col,z)=>{const r=XLSX.utils.decode_range(ws['!ref']);for(let i=1;i<=r.e.r;i++){const c=ws[XLSX.utils.encode_cell({r:i,c:col})];if(c)c.z=z}};
+ /* resumo mensal */
+ const meses=[...new Set(L.map(l=>l.data.slice(0,7)))].sort();
+ const res=[['Mês','Faturamento','Despesas','Lucro líquido','Margem']];
+ meses.forEach(m=>{const t=totais(m);res.push([m.split('-').reverse().join('/'),t.rec,t.desp,0,0])});
+ const n=meses.length;res.push(['TOTAL',0,0,0,0]);
+ const ws1=mk(res,[12,16,16,16,10]);
+ for(let i=0;i<=n;i++){
+  const r=i+2,tot=i===n,rec=tot?meses.reduce((s,m)=>s+totais(m).rec,0):totais(meses[i]).rec,des=tot?meses.reduce((s,m)=>s+totais(m).desp,0):totais(meses[i]).desp;
+  if(tot){ws1['B'+r]={t:'n',v:rec,f:`SUM(B2:B${n+1})`,z:R};ws1['C'+r]={t:'n',v:des,f:`SUM(C2:C${n+1})`,z:R}}
+  else{ws1['B'+r].z=R;ws1['C'+r].z=R}
+  ws1['D'+r]={t:'n',v:rec-des,f:`B${r}-C${r}`,z:R};
+  ws1['E'+r]={t:'n',v:rec?(rec-des)/rec:0,f:`IF(B${r}=0,0,D${r}/B${r})`,z:'0%'};
+ }
+ XLSX.utils.book_append_sheet(wb,ws1,'Resumo');
+ /* lançamentos */
+ const ws2=mk([['Data','Tipo','Descrição','Categoria','Pagamento','Valor (R$)'],...L.map(l=>[ser(l.data),l.tipo==='receita'?'Receita':'Despesa',l.desc,l.cat||'',l.pag||'',+l.valor||0])],[12,10,44,22,18,16]);
+ fmt(ws2,0,D);fmt(ws2,5,R);ws2['!autofilter']={ref:ws2['!ref']};
+ XLSX.utils.book_append_sheet(wb,ws2,'Lançamentos');
+ /* atendimentos */
+ const A=db.agendamentos.filter(a=>inr(a.data)).sort(byDT);
+ const ws3=mk([['Data','Hora','Cliente','Serviço','Valor (R$)','Sinal (R$)','Sinal pago','Status','Pagamento'],...A.map(a=>[ser(a.data),a.hora,cli(a.clienteId).nome,srv(a.servicoId).nome,+a.valor||0,+a.sinal||0,+a.sinal>0?(a.sinalPago?'Sim':'Não'):'',STATUS[a.status]||a.status,a.pagamento||''])],[12,8,28,36,14,14,11,13,18]);
+ fmt(ws3,0,D);fmt(ws3,4,R);fmt(ws3,5,R);ws3['!autofilter']={ref:ws3['!ref']};
+ XLSX.utils.book_append_sheet(wb,ws3,'Atendimentos');
+ /* despesas por categoria */
+ const cats={};L.filter(l=>l.tipo==='despesa').forEach(l=>{const k=l.cat||'Outros';cats[k]=(cats[k]||0)+(+l.valor||0)});
+ const ws4=mk([['Categoria','Total (R$)'],...Object.entries(cats).sort((a,b)=>b[1]-a[1])],[30,16]);fmt(ws4,1,R);
+ XLSX.utils.book_append_sheet(wb,ws4,'Despesas por categoria');
+ XLSX.writeFile(wb,`financeiro-gr-studio-${modo==='tudo'?'completo':finMes}.xlsx`);
+ toast('Excel gerado ✓');
+}
+
+/* ============ MENSAGENS ============ */
+let verEnviadas=false;
+function msgCard(i){
+ const sent=db.enviados[i.key],a=i.ag;
+ const det=i.tipo==='aniversario'?`Completa ${idade(i.cliente.nasc)} anos hoje 🎂`:i.tipo==='manutencao'?`${esc(srv(a.servicoId).nome)} feito em ${brDate(a.data)} · ${i.quando}`:`${esc(srv(a.servicoId).nome)} · ${i.quando}${i.tipo==='lembrete'?' às '+esc(a.hora):''}${i.tipo==='sinal'?' · sinal '+money(a.sinal):''}`;
+ return`<div class="msg ${sent?'sent':''}"><div class="msg-h"><div><div class="ag-n">${esc(i.cliente.nome)}</div><div class="ag-s">${det}${i.cliente.tel?'':' · <span class="neg">sem telefone</span>'}</div></div>${sent?'<span class="chip ok">Enviada</span>':''}</div>
+ <div class="msg-t">${esc(montar(i))}</div>
+ <div class="msg-a">${sent?`<button class="btn ghost sm" onclick="marcar('${i.key}',false)">Desfazer</button>`:`<button class="btn wa sm" onclick="enviar('${i.key}')">Enviar no WhatsApp</button><button class="btn ghost sm" onclick="marcar('${i.key}',true)">Já enviei</button>`}
+ ${i.tipo==='sinal'?`<button class="btn ghost sm" onclick="marcarSinal('${a.id}')">Marcar sinal pago</button>`:''}${i.tipo==='manutencao'?`<button class="btn ghost sm" onclick="formAg(null,'${i.cliente.id}')">Agendar</button>`:''}</div></div>`;
+}
+function vMensagens(){
+ const all=filaMensagens(),pend=all.filter(i=>!db.enviados[i.key]),show=verEnviadas?all:pend;
+ const G=[['lembrete','Lembrete de horário','Clientes com horário hoje ou amanhã'],['sinal','Sinal pendente','Agendamentos com sinal ainda não pago'],['manutencao','Manutenção','Clientes chegando na data ideal de manutenção e sem horário marcado'],['aniversario','Aniversário','Aniversariantes de hoje']];
+ return`<div class="head"><div><div class="eyebrow">Mensagens automáticas</div><h1>${pend.length?pend.length+' para enviar hoje':'Tudo em dia ✓'}</h1></div></div>
+ <div class="banner">As mensagens são geradas sozinhas todos os dias a partir da agenda e das clientes. Toque em <b>Enviar no WhatsApp</b> e o texto já abre pronto na conversa da cliente — é só apertar enviar. Os textos podem ser editados em <b>Ajustes</b>.</div>
+ <div class="toggle"><button class="btn sm ${verEnviadas?'ghost':'gold'}" onclick="verEnviadas=false;render()">Pendentes</button><button class="btn sm ${verEnviadas?'gold':'ghost'}" onclick="verEnviadas=true;render()">Todas</button></div>
+ ${G.map(([t,ti,sub])=>{const it=show.filter(i=>i.tipo===t),n=pend.filter(i=>i.tipo===t).length;return`<div class="card"><h2>${ti} <span class="cnt ${n?'':'z'}">${n}</span></h2><p class="muted sm">${sub}</p>${it.length?it.map(msgCard).join(''):empty('Nada por aqui ✓')}</div>`}).join('')}`;
+}
+
+/* ============ AJUSTES ============ */
+function vAjustes(){const c=db.config;return`<div class="head"><div><div class="eyebrow">Ajustes</div><h1>Configurações</h1></div></div>
+ <form class="card" onsubmit="salvarCfg(event)"><h2>Dados do studio</h2>
+ <div class="row"><label>Nome do studio<input name="studio" value="${esc(c.studio)}"></label><label>Profissional<input name="profissional" value="${esc(c.profissional)}"></label></div>
+ <div class="row"><label>Chave PIX (cobrança do sinal)<input name="pix" value="${esc(c.pix)}" placeholder="CPF, celular, e-mail ou chave aleatória"></label><label>Endereço<input name="endereco" value="${esc(c.endereco)}"></label></div>
+ <label>Lembrar manutenção com quantos dias de antecedência<input type="number" min="0" name="antecedenciaManut" value="${c.antecedenciaManut}"></label>
+ <h2 style="margin-top:10px">Textos das mensagens</h2><p class="muted sm" style="margin-bottom:12px">Campos automáticos: {nome} {servico} {data} {dia_semana} {hora} {valor} {sinal} {pix} {studio} {endereco} {profissional} · *texto* fica em negrito no WhatsApp</p>
+ ${Object.keys(LBL).map(k=>`<label>${LBL[k]}<textarea name="tpl_${k}" rows="6">${esc(c.tpl[k])}</textarea></label>`).join('')}
+ <div class="mfoot"><button type="button" class="btn ghost" onclick="restaurarTpl()">Restaurar textos padrão</button><button class="btn gold">Salvar ajustes</button></div></form>
+ <div class="card"><h2>Conta</h2><p class="muted sm" style="margin-bottom:14px">Conectada como <b>${esc(session&&session.user?session.user.email:'')}</b>. Para criar outro acesso, use o painel do Supabase (Authentication → Users).</p><div class="btns"><button class="btn ghost" onclick="formSenha()">Trocar senha</button><button class="btn danger" onclick="sair()">Sair</button></div></div>
+ <div class="card"><h2>Backup dos dados</h2><p class="muted sm" style="margin-bottom:14px">Seus dados ficam salvos na nuvem e aparecem em qualquer aparelho onde você entrar. O backup é uma cópia extra de segurança.${db.ultimoBackup?' Último backup: '+brDate(db.ultimoBackup)+'.':''}</p>
+ <div class="btns"><button class="btn gold" onclick="exportar()">Baixar backup</button><label class="btn ghost">Restaurar backup<input type="file" accept=".json,application/json" hidden onchange="importar(this)"></label><button class="btn danger" onclick="zerar()">Apagar tudo</button></div></div>`}
+function salvarCfg(e){e.preventDefault();const f=new FormData(e.target),c=db.config;['studio','profissional','pix','endereco'].forEach(k=>c[k]=String(f.get(k)||'').trim());c.antecedenciaManut=+f.get('antecedenciaManut')||0;Object.keys(LBL).forEach(k=>c.tpl[k]=String(f.get('tpl_'+k)||''));save();toast('Ajustes salvos ✓');render()}
+function restaurarTpl(){if(!confirm('Voltar os textos das mensagens ao padrão?'))return;db.config.tpl={...TPL};save();render();toast('Textos restaurados')}
+function exportar(){db.ultimoBackup=today();save();const b=new Blob([JSON.stringify(db)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`backup-gr-studio-${today()}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000);toast('Backup baixado ✓');render()}
+function importar(inp){const file=inp.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||!Array.isArray(d.clientes)||!Array.isArray(d.agendamentos))throw 0;if(!confirm('Substituir TODOS os dados atuais pelos do backup?'))return;db=normalize(d);save();render();toast('Backup restaurado ✓')}catch(e){alert('Arquivo de backup inválido.')}};r.readAsText(file);inp.value=''}
+function zerar(){if(prompt('Isso apaga TODOS os dados deste aparelho. Digite APAGAR para confirmar:')!=='APAGAR')return;db=defaultDB();save();render();toast('Dados apagados')}
+
+/* ============ MODAL / TOAST ============ */
+function openModal(t,h){document.getElementById('mtitle').textContent=t;document.getElementById('mbody').innerHTML=h;document.getElementById('modal').classList.remove('hidden')}
+function closeModal(){document.getElementById('modal').classList.add('hidden');document.getElementById('mbody').innerHTML=''}
+let tt;function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2800)}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
+window.addEventListener('focus',refresh);
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
+
+/* ============ INÍCIO ============ */
+boot();
+</script>
+</body>
+</html>
